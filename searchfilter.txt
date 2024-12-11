@@ -1,0 +1,66 @@
+import React, { useState } from 'react';
+import axios from 'axios';
+import './SearchFilter.css'; // Import the CSS file for styling
+
+const SearchFilter = () => {
+  const [filters, setFilters] = useState({
+    date: '',
+    time: '',
+    location: '',
+    cuisine: '',
+    price: ''
+  });
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false); // Add loading state
+  const [error, setError] = useState(null); // Add error state
+
+  const handleSearch = async () => {
+    setLoading(true);
+    setError(null); // Reset error state
+    try {
+      const response = await axios.post('/api/search', filters);
+      setResults(response.data);
+    } catch (err) {
+      console.error('Error fetching search results:', err);
+      setError('Failed to fetch results. Please try again.'); // Set error message
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="search-container">
+      <h2>Search for Reservations</h2>
+      <div className="search-inputs">
+        <input type="date" onChange={(e) => setFilters({ ...filters, date: e.target.value })} />
+        <input type="time" onChange={(e) => setFilters({ ...filters, time: e.target.value })} />
+        <input type="text" placeholder="Location" onChange={(e) => setFilters({ ...filters, location: e.target.value })} />
+        <input type="text" placeholder="Cuisine" onChange={(e) => setFilters({ ...filters, cuisine: e.target.value })} />
+        <input type="number" placeholder="Max Price" onChange={(e) => setFilters({ ...filters, price: e.target.value })} />
+        <button className="btn" onClick={handleSearch}>Search</button>
+      </div>
+      {loading && <div className="loading">Loading results...</div>}
+      {error && <div className="error">{error}</div>}
+      {results.length > 0 ? (
+        <ul className="results-list">
+          {results.map(result => (
+            <li key={result.id} className="result-item">
+              <div className="meal-details">
+                <h3>{result.meal}</h3>
+                <p><strong>Location:</strong> {result.location}</p>
+                <p><strong>Cuisine:</strong> {result.cuisine}</p>
+                <p><strong>Price:</strong> ${result.price}</p>
+                <p><strong>Date:</strong> {result.reservation_date}</p>
+                <p><strong>Time:</strong> {result.reservation_time}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        !loading && <div className="no-results">No results found. Please adjust your filters.</div>
+      )}
+    </div>
+  );
+};
+
+export default SearchFilter;

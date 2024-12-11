@@ -1,0 +1,41 @@
+const express = require('express');
+const sql = require('mssql');
+const authenticateUser  = require('./authMiddleware'); // Import the middleware
+const router = express.Router();
+const sqlConfig = require('./config'); // Import your SQL config
+
+// Booking endpoint with authentication
+router.post('/', authenticateUser , async (req, res) => {
+    const { mealId, quantity } = req.body;
+    const userId = req.user.id; // Get user ID from the authenticated request
+
+    // Validate input
+    if (!mealId || !quantity) {
+        return res.status(400).json({ message: 'Meal ID and quantity are required' });
+    }
+
+    if (typeof quantity !== 'number' || quantity <= 0) {
+        return res.status(400).json({ message: 'Quantity must be a positive integer' });
+    }
+
+    try {
+        await sql.connect(sqlConfig);
+        console.log('Connected to the database successfully!');
+
+        // Insert the booking into the database
+        const result = await sql.query`INSERT INTO reservations (userId, mealId, quantity) VALUES (${userId}, ${mealId}, ${quantity})`;
+
+        if (result.rowsAffected[0] > 0) {
+            res.status(201).json({ message: 'Booking successful' });
+        } else {
+            res.status(500).json({ message: 'Booking failed' });
+        }
+    } catch (error) {
+        console.error('Error during booking:', error);
+        res.status(500).json({ message: 'Booking failed' });
+    } finally {
+        await sql.close();
+    }
+});
+
+module.exports = router;

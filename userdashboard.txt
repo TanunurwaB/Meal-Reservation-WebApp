@@ -1,0 +1,38 @@
+import React from 'react';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import 'swiper/swiper-bundle.css';
+import UserProfile from './components/UserProfile.js';
+import BookingInterface from './components/BookingInterface.js';
+import BusinessDashboard from './components/BusinessDashboard.js';
+import SearchFilter from './components/SearchFilter.js';
+import './User DashBoard.css'; // Import the CSS file for styling
+
+const UserDashboard = () => {
+  return (
+    <div className="dashboard-container">
+      <h2 className="dashboard-title">User  Dashboard</h2>
+      <Swiper
+        spaceBetween={30}
+        slidesPerView={1}
+        navigation
+        pagination={{ clickable: true }}
+        className="dashboard-swiper"
+      >
+        <SwiperSlide>
+          <UserProfile />
+        </SwiperSlide>
+        <SwiperSlide>
+          <BookingInterface />
+        </SwiperSlide>
+        <SwiperSlide>
+          <BusinessDashboard />
+        </SwiperSlide>
+        <SwiperSlide>
+          <SearchFilter />
+        </SwiperSlide>
+      </Swiper>
+    </div>
+  );
+};
+
+export default UserDashboard;

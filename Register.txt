@@ -1,0 +1,47 @@
+//register.js
+
+const express = require('express');
+const sql = require('mssql');
+const bcrypt = require('bcrypt');
+const router = express.Router();
+const sqlConfig = require('./config'); // Import your SQL config
+
+router.post('/api/register', async (req, res) => {
+    const { username, email, phone, password } = req.body; // Include username
+
+    // Validate input
+    if (!username || !email || !phone || !password) {
+        return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    try {
+        await sql.connect(sqlConfig);
+        console.log('Connected to the database successfully!');
+
+        // Check if the email or username already exists
+        const existingUser  = await sql.query`SELECT * FROM Users WHERE email = ${email} OR username = ${username}`;
+        if (existingUser .recordset.length > 0) {
+            return res.status(400).json({ message: 'Email or username already registered' });
+        }
+
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Insert the new user into the database
+        const result = await sql.query`INSERT INTO Users (username, email, phone, password) VALUES (${username}, ${email}, ${phone}, ${hashedPassword})`;
+
+        if (result.rowsAffected[0] > 0) {
+            // Instead of generating a JWT, we will just return a success message
+            res.status(201).json({ message: 'User  registered successfully' });
+        } else {
+            res.status(500).json({ message: 'Registration failed' });
+        }
+    } catch (error) {
+        console.error('Error during registration:', error);
+        res.status(500).json({ message: 'Registration failed' });
+    } finally {
+        await sql.close();
+    }
+});
+
+module.exports = router;

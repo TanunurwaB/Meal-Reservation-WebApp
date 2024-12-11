@@ -1,0 +1,48 @@
+const express = require('express');
+const sql = require('mssql');
+const jwt = require('jsonwebtoken'); // Import JWT
+const router = express.Router();
+const sqlConfig = require('./config'); // Import your SQL config
+
+// Middleware to authenticate user
+const authenticateUser  = async (req, res, next) => {
+    const token = req.headers['authorization']?.split(' ')[1]; // Get token from Authorization header
+
+    if (!token) {
+        return res.status(401).json({ message: 'No token provided' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET); // Verify token
+        req.user = decoded; // Attach user info to request
+        next(); // Proceed to the next middleware
+    } catch (error) {
+        return res.status(401).json({ message: 'Invalid token' });
+    }
+};
+
+// GET /api/user/profile
+router.get('/profile', authenticateUser , async (req, res) => {
+    try {
+        await sql.connect(sqlConfig);
+        console.log('Connected to the database successfully!');
+
+        // Fetch user profile based on the user ID from the token
+        const userId = req.user.id; // Assuming the user ID is stored in the token
+        const result = await sql.query`SELECT username, email, phone, preferences FROM Users WHERE id = ${userId}`;
+
+        if (result.recordset.length === 0) {
+            return res.status(404).json({ message: 'User  not found' });
+        }
+
+        const user = result.recordset[0]; // Get the user data
+        res.json(user); // Send user data as response
+    } catch (error) {
+        console.error('Error fetching user profile:', error);
+        res.status(500).json({ message: 'Server error' });
+    } finally {
+        await sql.close();
+    }
+});
+
+module.exports = router;

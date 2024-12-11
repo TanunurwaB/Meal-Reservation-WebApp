@@ -1,0 +1,19 @@
+// MealCard.js
+import React from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUtensils } from '@fortawesome/free-solid-svg-icons';
+
+const MealCard = ({ meal, onSelect }) => {
+  return (
+    <div className="meal-card">
+      <img src={require(`./${meal.imageUrl}`)} alt={meal.name} />
+      <h3>{meal.name}</h3>
+      <p>${meal.price}</p>
+      <button onClick={() => onSelect(meal.id)}>
+        <FontAwesomeIcon icon={faUtensils} /> Select
+      </button>
+    </div>
+  );
+};
+
+export default MealCard;

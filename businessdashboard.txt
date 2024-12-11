@@ -1,0 +1,99 @@
+import React, { useState, useEffect } from 'react';
+import { getBookings, fetchMeals, addMeal, deleteMeal } from '../api'; // Changed getMeals to fetchMeals
+import { useAuth } from '../provider/authProvider';
+
+const BusinessDashboard = () => {
+  const [bookings, setBookings] = useState([]);
+  const [meals, setMeals] = useState([]);
+  const [newMeal, setNewMeal] = useState({ name: '', description: '' });
+  const { token } = useAuth();
+
+  useEffect(() => {
+    const fetchBookings = async () => {
+      try {
+        const response = await getBookings(token);
+        setBookings(response.data);
+      } catch (error) {
+        console.error('Error fetching bookings:', error);
+      }
+    };
+    fetchBookings();
+  }, [token]);
+
+  useEffect(() => {
+    const fetchMealsData = async () => {
+      try {
+        const response = await fetchMeals(); // Use fetchMeals instead of getMeals
+        setMeals(response); // Set meals directly if response is already the data
+      } catch (error) {
+        console.error('Error fetching meals:', error);
+      }
+    };
+    fetchMealsData();
+  }, []);
+
+  const handleAddMeal = async () => {
+    try {
+      const response = await addMeal(newMeal); // Adjusted to match expected parameters
+      setMeals([...meals, response]); // Set meals directly if response is already the data
+      setNewMeal({ name: '', description: '' }); // Reset form
+      alert('Meal added successfully!');
+    } catch (error) {
+      console.error('Error adding meal:', error);
+      alert('Failed to add meal.');
+    }
+  };
+
+  const handleDeleteMeal = async (mealId) => {
+    try {
+      await deleteMeal(mealId); // Adjusted to match expected parameters
+      setMeals(meals.filter(meal => meal.id !== mealId));
+      alert('Meal deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting meal:', error);
+      alert('Failed to delete meal.');
+    }
+  };
+
+  return (
+    <div>
+      <h1>Business Dashboard</h1>
+      <h2>Bookings</h2>
+      <ul>
+        {bookings.map((booking) => (
+          <li key={booking.id}>
+            <p>Meal: {booking.meal.name}</p>
+            <p>User: {booking.user.username}</p>
+            <p>Date: {booking.date}</p>
+          </li>
+        ))}
+      </ul>
+      <h2>Meals</h2>
+      <ul>
+        {meals.map((meal) => (
+          <li key={meal.id}>
+            <h2>{meal.name}</h2>
+            <p>{meal.description}</p>
+            <button onClick={() => handleDeleteMeal(meal.id)}>Delete Meal</button>
+          </li>
+        ))}
+      </ul>
+      <h2>Add New Meal</h2>
+      <input
+        type="text"
+        placeholder="Meal Name"
+        value={newMeal.name}
+        onChange={(e) => setNewMeal({ ...newMeal, name: e.target.value })}
+      />
+      <input
+        type="text"
+        placeholder="Meal Description"
+        value={newMeal.description}
+        onChange={(e) => setNewMeal({ ...newMeal, description: e.target.value })}
+      />
+      <button onClick={handleAddMeal}>Add Meal</button>
+    </div>
+  );
+};
+
+export default BusinessDashboard;

@@ -1,0 +1,84 @@
+import axios from 'axios';
+
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
+
+// Function to handle API requests with error handling
+const handleRequest = async (request, headers = {}) => {
+  try {
+    const response = await request({ headers });
+    return response.data; // Return only the data part of the response
+  } catch (error) {
+    // Handle errors appropriately
+    if (error.response) {
+      console.error('Error response:', error.response.data);
+      console.error('Status code:', error.response.status);
+      throw new Error(error.response.data.message || 'An error occurred', error);
+    } else if (error.request) {
+      console.error('No response received:', error.request);
+      throw new Error('No response received from the server');
+    } else {
+      console.error('Error:', error.message);
+      throw new Error('An error occurred while making the request');
+    }
+  }
+};
+
+// User authentication functions
+export const login = async (userData) => {
+  return await handleRequest(() => axios.post(`${API_URL}/login`, userData));
+};
+
+export const register = async (userData) => {
+  return await handleRequest(() => axios.post(`${API_URL}/register`, userData));
+};
+
+// Meal functions
+export const fetchMeals = async () => {
+  return await handleRequest(() => axios.get(`${API_URL}/meals`));
+};
+
+export const addMeal = async (mealData) => {
+  return await handleRequest(() => axios.post(`${API_URL}/meals`, mealData));
+};
+
+export const deleteMeal = async (mealId) => {
+  return await handleRequest(() => axios.delete(`${API_URL}/meals/${mealId}`));
+};
+
+// Booking function
+export const bookMeal = async (bookingData) => {
+  return await handleRequest(() => axios.post(`${API_URL}/book`, bookingData));
+};
+
+// Additional functions can be added here as needed
+export const fetchUserProfile = async (token) => {
+  return await handleRequest(() => axios.get(`${API_URL}/user/profile`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }));
+};
+
+export const fetchBusinessReservations = async (token) => {
+  return await handleRequest(() => axios.get(`${API_URL}/business/reservations`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }));
+};
+
+export const searchReservations = async (filters, token) => {
+  return await handleRequest(() => axios.post(`${API_URL}/search`, filters, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }));
+};
+
+export const getBookings = async (token) => {
+  return await handleRequest(() => axios.get(`${API_URL}/bookings`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }));
+};

@@ -1,0 +1,13 @@
+// config.js
+const sqlConfig = {
+    user: 'root',
+    password: '2468',
+    server: 'localhost',
+    database: 'Reservations',
+    options: {
+        encrypt: false,
+        trustServerCertificate: true
+    }
+};
+
+module.exports = sqlConfig;

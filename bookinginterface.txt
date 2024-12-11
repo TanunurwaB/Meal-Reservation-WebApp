@@ -1,0 +1,70 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import MealCard from './MealCard'; // Import the new MealCard component
+import './BookingInterface.css'; // Import the CSS file for styling
+
+const BookingInterface = () => {
+  const [meals, setMeals] = useState([]);
+  const [selectedMeal, setSelectedMeal] = useState(null);
+  const [quantity, setQuantity] = useState(1);
+
+  useEffect(() => {
+    const fetchMeals = async () => {
+      try {
+        const response = await axios.get('/api/meals');
+        setMeals(response.data);
+      } catch (error) {
+        console.error('Error fetching meals:', error);
+      }
+    };
+    fetchMeals();
+  }, []);
+
+  const handleBooking = async () => {
+    if (!selectedMeal) {
+      alert('Please select a meal to book.');
+      return;
+    }
+
+    try {
+      await axios.post('/api/book', { mealId: selectedMeal, quantity });
+      alert('Booking successful!');
+      setSelectedMeal(null); // Clear selection after booking
+      setQuantity(1); // Reset quantity after booking
+    } catch (error) {
+      alert('Booking failed! Please try again.');
+      console.error('Error booking meal:', error);
+    }
+  };
+
+  return (
+    <main className="booking-interface">
+      <h2 className="booking-title">All the Best Meals in Town Now!</h2>
+      <Swiper className="mySwiper" spaceBetween={30} slidesPerView={1}>
+        {meals.map(meal => (
+          <SwiperSlide key={meal.id} className="meal-slide">
+            <MealCard meal={meal} onSelect={setSelectedMeal} />
+          </SwiperSlide>
+        ))}
+        {selectedMeal && (
+          <SwiperSlide className='booking-details-slide'>
+            <div className="booking-details">
+              <h3>Selected Meal: {meals.find(meal => meal.id === selectedMeal)?.name}</h3>
+              <input
+                type="number"
+                value={quantity}
+                onChange={(e) => setQuantity(Math.max(1, e.target.value))} // Ensure quantity is at least 1
+                min="1"
+                className="quantity-input"
+              />
+              <button onClick={handleBooking} className="btn">Book Now</button>
+            </div>
+          </SwiperSlide>
+        )}
+      </Swiper>
+    </main>
+  );
+};
+
+export default BookingInterface;

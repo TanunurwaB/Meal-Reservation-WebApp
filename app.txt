@@ -1,0 +1,25 @@
+import React from 'react';
+import { Route, Routes } from 'react-router-dom';
+import HomePage from './HomePage.js';
+import UserRegistration from './components/UserRegistration.js';
+import UserLogin from './components/UserLogin.js'; // Import UserLogin component
+import UserDashboard from './UserDashboard.js'; // This will contain the Swiper tabs
+import { AuthProvider } from './AuthContext'; // Import the AuthProvider
+
+const App = () => {
+  return (
+    <AuthProvider> {/* Wrap your application with AuthProvider */}
+      <div className="App">
+        <h1>Reservation Manager</h1>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/register" element={<UserRegistration />} />
+          <Route path="/login" element={<UserLogin />} /> {/* Add route for UserLogin */}
+          <Route path="/dashboard/*" element={<UserDashboard />} /> {/* Nested routes for dashboard */}
+        </Routes>
+      </div>
+    </AuthProvider>
+  );
+};
+
+export default App;

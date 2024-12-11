@@ -1,0 +1,44 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import './User Profile.css'; // Import the CSS file for styling
+
+const UserProfile = () => {
+  const [user, setUser ] = useState(null); // Change initial state to null
+  const [loading, setLoading] = useState(true); // Add loading state
+  const [error, setError] = useState(null); // Add error state
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const response = await axios.get('/api/user/profile'); // Adjusted API endpoint
+        setUser (response.data);
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+        setError('Failed to load user profile.'); // Set error message
+      } finally {
+        setLoading(false); // Set loading to false after fetching
+      }
+    };
+    fetchUserProfile();
+  }, []);
+
+  if (loading) {
+    return <div className="loading">Loading...</div>; // Show loading message
+  }
+
+  if (error) {
+    return <div className="error">{error}</div>; // Show error message
+  }
+
+  return (
+    <div className="profile-container">
+      <h2>User Profile</h2>
+      <p><strong>Email:</strong> {user.email}</p>
+      <p><strong>Phone:</strong> {user.phone}</p>
+      <p><strong>Preferences:</strong> {user.preferences.join(', ')}</p>
+      <button className="btn" onClick={() => alert('Edit Profile functionality to be implemented')}>Edit Profile</button>
+    </div>
+  );
+};
+
+export default UserProfile;

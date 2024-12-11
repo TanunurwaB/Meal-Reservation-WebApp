@@ -1,0 +1,23 @@
+const express = require('express');
+const mealsRouter = require('./meals.js'); // Path to meals
+const bookingsRouter = require('./bookings.js'); // Path to bookings
+const loginRouter = require('./login.js'); // Path to login
+const registerRouter = require('./register.js'); // Path to register
+const businessDashboardRouter = require('../routes/businessDashboard.js'); // Adjusted path to business dashboard
+const app = express();
+const PORT = 3000;
+
+// Middleware to parse JSON bodies
+app.use(express.json());
+
+// Use the meals, bookings, login, registration, and business dashboard routes
+app.use('/api/meals', mealsRouter);
+app.use('/api/book', bookingsRouter);
+app.use('/api/login', loginRouter); // Use the login route
+app.use('/api/register', registerRouter); // Use the registration route
+app.use('/api/business', businessDashboardRouter); // Use the business dashboard route
+
+// Start the server
+app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:3000:${PORT}`);
+});
